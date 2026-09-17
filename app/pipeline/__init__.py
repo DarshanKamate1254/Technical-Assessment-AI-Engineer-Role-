@@ -1,10 +1,20 @@
-"""Pipeline package for data ingestion, parsing, validation, and cleaning."""
+"""Pipeline package for data ingestion, parsing, validation, cleaning, and feature engineering."""
 
 from app.pipeline.cleaner import (
     CATEGORY_MAP,
     PRIORITY_MAP,
     STATUS_MAP,
     DataCleaner,
+)
+from app.pipeline.feature_engineer import (
+    FEATURE_METADATA,
+    PRIORITY_LEVEL_MAP,
+    RESOLUTION_TIME_BINS,
+    RESOLUTION_TIME_LABELS,
+    RESPONSE_TIME_BINS,
+    RESPONSE_TIME_LABELS,
+    FeatureEngineer,
+    engineer_features,
 )
 from app.pipeline.parser import (
     CSVReadError,
@@ -74,4 +84,13 @@ __all__ = [
     # Pipeline exports
     "validate_and_clean",
     "validate_and_clean_with_report",
+    # Feature Engineering exports
+    "engineer_features",
+    "FeatureEngineer",
+    "FEATURE_METADATA",
+    "PRIORITY_LEVEL_MAP",
+    "RESPONSE_TIME_BINS",
+    "RESPONSE_TIME_LABELS",
+    "RESOLUTION_TIME_BINS",
+    "RESOLUTION_TIME_LABELS",
 ]
