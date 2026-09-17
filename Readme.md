@@ -228,3 +228,32 @@ You can test these questions in the **Streamlit UI** (hit Enter after typing) or
 4. `Show high-priority unresolved tickets older than 24 hours.`
 5. `What is the average resolution time by priority?`
 6. `Are there any anomalies in resolution times?`
+
+---
+
+## Application UI Demos
+
+### Query 1: Unresolved Critical Tickets
+
+Question: *"How many critical tickets are unresolved?"*
+
+#### Query Input & Interface
+![Query 1 - Interface](./qry1.png)
+
+#### Answer, Executed Tools & Evidence Payload
+![Query 1 - Answer & Evidence](./qry1(1).png)
+
+---
+
+### Query 2: High-Priority Unresolved Tickets (> 24 Hours)
+
+Question: *"Show high-priority unresolved tickets older than 24 hours."*
+
+#### Query Input & Response Overview
+![Query 2 - Interface](./qry2.png)
+
+#### Unresolved Tickets Table (Age, Priority, Agent, Summary)
+![Query 2 - Result Table](./qry2(2).png)
+
+#### Tools Executed & Structured JSON Evidence
+![Query 2 - Evidence Payload](./qry2(3).png)
