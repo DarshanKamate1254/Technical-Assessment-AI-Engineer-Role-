@@ -15,7 +15,7 @@ from langchain_groq import ChatGroq
 # Load .env file from project root if present
 load_dotenv(override=False)
 
-DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
 DEFAULT_TEMPERATURE = 0.0
 
 

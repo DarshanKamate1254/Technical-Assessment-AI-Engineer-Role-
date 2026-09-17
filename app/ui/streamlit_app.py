@@ -4,14 +4,22 @@ This frontend communicates EXCLUSIVELY with the FastAPI backend via HTTP (APICli
 It contains NO direct imports of SQLite, analytics, anomalies, LangChain, or Groq.
 """
 
-from __future__ import annotations
-
 import json
 import os
-import streamlit as st
+import sys
+from pathlib import Path
 import pandas as pd
+import streamlit as st
 
-from app.ui.api_client import APIClient
+# Ensure project root is in sys.path when running directly with streamlit
+_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(_ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(_ROOT_DIR))
+
+try:
+    from app.ui.api_client import APIClient
+except ModuleNotFoundError:
+    from api_client import APIClient  # type: ignore
 
 # -----------------------------------------------------------------------------
 # Configuration & Client Setup

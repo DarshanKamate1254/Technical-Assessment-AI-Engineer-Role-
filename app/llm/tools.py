@@ -149,9 +149,16 @@ def create_support_tools(db_path: str | Path | None = None) -> list[BaseTool]:
 
         Evaluates operational business rules (High/Critical unresolved >24h, Critical unresolved,
         Long resolution >48h) and statistical IQR resolution-time outliers. Returns anomaly counts
-        by severity, IQR thresholds, and detailed evidence for each flagged ticket.
+        by severity, IQR thresholds, and sample flagged tickets.
         """
-        return _detect_anomalies(db_path)
+        raw = _detect_anomalies(db_path)
+        anomalies_list = raw.get("anomalies", [])
+        return {
+            "summary": raw.get("summary", {}),
+            "statistical_thresholds": raw.get("statistical_thresholds", {}),
+            "sample_anomalies": anomalies_list[:10],
+            "total_anomalies_count": len(anomalies_list),
+        }
 
     return [
         get_ticket_summary,
