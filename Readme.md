@@ -1,40 +1,40 @@
 # Customer Support AI Analytics System
 
-An end-to-end AI-powered support ticket analytics and anomaly detection system built with **FastAPI**, **Streamlit**, **LangChain**, **Groq LLM**, and **SQLite**.
+An end-to-end AI-powered support ticket analytics and anomaly detection system built with FastAPI, Streamlit, LangChain, Groq LLM, and SQLite.
 
 ---
 
-## 📌 Problem Statement
+## Problem Statement
 
 > **Objective:**
 > Given a customer support ticket dataset (`support_tickets.csv`), build an end-to-end AI-powered system that does all of the following:
 > 1. **Ingest & Persist:** Ingest the raw CSV data, clean and validate it, engineer operational features, and store it in a queryable SQLite database.
-> 2. **Natural Language Q&A:** Answer natural language questions about the ticket data (e.g., *"How many critical tickets are unresolved?"*, *"Which agent has the lowest average customer rating?"*).
+> 2. **Natural Language Q&A:** Answer natural language questions about the ticket data (e.g., "How many critical tickets are unresolved?", "Which agent has the lowest average customer rating?").
 > 3. **Anomaly Detection:** Detect and flag operational anomalies (e.g., unresolved high-priority tickets older than 24 hours, critical unresolved tickets, and statistical resolution time outliers using IQR).
 > 4. **Dual Interface:** Expose full functionality via a **FastAPI REST API** and an interactive **Streamlit UI** (where Streamlit communicates with the backend exclusively via HTTP).
 > 5. **LLM Orchestration:** Use an LLM for natural language interpretation while delegating all data retrieval and mathematical calculations to deterministic tools without hallucination.
 
 ---
 
-## 🔄 Step-by-Step Implementation Workflow
+## Step-by-Step Implementation Workflow
 
 The system was developed modularly across 8 distinct pipeline stages:
 
 ```text
        1. CSV Parsing
-             ↓
+             |
   2. Validation + Cleaning
-             ↓
+             |
    3. Feature Engineering
-             ↓
+             |
     4. Store / Query Layer (SQLite)
-             ↓
+             |
 5. Analytics + Anomaly Detection
-             ↓
+             |
    6. LLM (Groq) + LangChain
-             ↓
+             |
        7. FastAPI Backend
-             ↓
+             |
      8. Streamlit UI (Frontend)
 ```
 
@@ -49,7 +49,7 @@ The system was developed modularly across 8 distinct pipeline stages:
 * **Stage 4 — SQLite Store & Query Layer (`app/database/`)**:
   Loads processed records into an indexed SQLite database and provides a secure, parameterized query repository.
 * **Stage 5 — Analytics & Anomaly Detection (`app/analytics/`, `app/anomalies/`)**:
-  Computes volume, backlog, agent ratings, resolution times, and flags SLA breaches alongside statistical 1.5× IQR outliers.
+  Computes volume, backlog, agent ratings, resolution times, and flags SLA breaches alongside statistical 1.5x IQR outliers.
 * **Stage 6 — LangChain + Groq LLM (`app/llm/`)**:
   Connects a deterministic tool-calling LangChain agent to Groq LLM (`openai/gpt-oss-120b` / `llama-3.3-70b-versatile`), grounding answers in verified database evidence.
 * **Stage 7 — FastAPI REST API (`app/api/`)**:
@@ -59,54 +59,56 @@ The system was developed modularly across 8 distinct pipeline stages:
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```text
                       STREAMLIT UI (Port 8501)
                      (app/ui/streamlit_app.py)
-                                 │
-                                 │ HTTP (APIClient)
-                                 ▼
+                                 |
+                                 | HTTP (APIClient)
+                                 v
                      FASTAPI REST API (Port 8000)
                          (app/api/main.py)
-                                 │
-        ┌────────────────────────┼────────────────────────┐
-        ▼                        ▼                        ▼
+                                 |
+        +------------------------+------------------------+
+        |                        |                        |
+        v                        v                        v
     POST /ask          GET /analytics/summary       GET /anomalies
-        │                        │                        │
-        ▼                        ▼                        ▼
+        |                        |                        |
+        v                        v                        v
   LangChain Agent        Analytics Metrics        Anomaly Detectors
-        │                        │                        │
-        ▼                        └───────────┬────────────┘
-    Groq LLM                                 │
-(openai/gpt-oss-120b)                        │
-        │                                    │
-        ▼                                    │
-  Deterministic Tools                        │
-        │                                    │
-        └────────────────────┬───────────────┘
-                             ▼
+        |                        |                        |
+        v                        +-----------+------------+
+    Groq LLM                                 |
+(openai/gpt-oss-120b)                        |
+        |                                    |
+        v                                    |
+  Deterministic Tools                        |
+        |                                    |
+        +--------------------+---------------+
+                             |
+                             v
                      SQLite Store Layer
                   (data/support_tickets.db)
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Language** | Python 3.10+ | Core programming language |
-| **Data Processing** | Pandas, NumPy | CSV parsing, cleaning, feature engineering |
-| **Database** | SQLite3 | Local indexed relational storage & queries |
-| **LLM & Agent** | LangChain, Groq API | Natural language orchestration & tool dispatch |
-| **Backend API** | FastAPI, Uvicorn, Pydantic | REST API endpoints, schemas, CORS |
-| **Frontend UI** | Streamlit, Requests | Interactive web dashboard & HTTP client |
-| **Testing** | Pytest | 103 automated unit and integration tests |
+| Language | Python 3.10+ | Core programming language |
+| Data Processing | Pandas, NumPy | CSV parsing, cleaning, feature engineering |
+| Database | SQLite3 | Local indexed relational storage & queries |
+| LLM & Agent | LangChain, Groq API | Natural language orchestration & tool dispatch |
+| Backend API | FastAPI, Uvicorn, Pydantic | REST API endpoints, schemas, CORS |
+| Frontend UI | Streamlit, Requests | Interactive web dashboard & HTTP client |
+| Testing | Pytest | 103 automated unit and integration tests |
 
 ---
 
-## 📂 Detailed Folder Structure
+## Detailed Folder Structure
 
 ```text
 .
@@ -173,7 +175,7 @@ The system was developed modularly across 8 distinct pipeline stages:
 
 ---
 
-## 🚀 How to Run the Project
+## How to Run the Project
 
 ### 1. Install Dependencies
 ```bash
@@ -193,18 +195,18 @@ API_BASE_URL=http://localhost:8000
 ```bash
 uvicorn app.api.main:app --reload --port 8000
 ```
-* **API Documentation (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
-* **Health Endpoint:** [http://localhost:8000/health](http://localhost:8000/health)
+* **API Documentation (Swagger UI):** http://localhost:8000/docs
+* **Health Endpoint:** http://localhost:8000/health
 
 ### 4. Start the Streamlit Frontend (Terminal 2)
 ```bash
 streamlit run app/ui/streamlit_app.py
 ```
-* **Web UI Application:** [http://localhost:8501](http://localhost:8501)
+* **Web UI Application:** http://localhost:8501
 
 ---
 
-## 🧪 Running Automated Tests
+## Running Automated Tests
 
 Run the full pytest suite (103 unit and integration tests):
 
@@ -216,9 +218,9 @@ All 103 tests pass covering CSV parsing, validation, cleaning, feature engineeri
 
 ---
 
-## 💡 Example Inquiries to Try
+## Example Inquiries to Try
 
-You can test these questions in the **Streamlit UI** (hit `Enter` after typing) or via `POST /ask`:
+You can test these questions in the **Streamlit UI** (hit Enter after typing) or via `POST /ask`:
 
 1. `How many critical tickets are unresolved?`
 2. `Which agent has the lowest average customer rating?`
