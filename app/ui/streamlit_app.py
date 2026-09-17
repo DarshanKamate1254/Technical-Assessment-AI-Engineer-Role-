@@ -4,6 +4,8 @@ This frontend communicates EXCLUSIVELY with the FastAPI backend via HTTP (APICli
 It contains NO direct imports of SQLite, analytics, anomalies, LangChain, or Groq.
 """
 
+from __future__ import annotations
+
 import json
 import os
 import sys
@@ -37,70 +39,164 @@ st.set_page_config(
 client = APIClient(base_url=API_BASE_URL)
 
 # -----------------------------------------------------------------------------
-# Custom Styling
+# Premium Custom Styling & CSS Design System
 # -----------------------------------------------------------------------------
 st.markdown(
     """
     <style>
-    .main-title {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #1E293B;
-        margin-bottom: 0.2rem;
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .sub-title {
-        font-size: 1rem;
-        color: #64748B;
-        margin-bottom: 1.5rem;
+
+    /* Hero Banner */
+    .hero-container {
+        background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+        border-radius: 16px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     }
-    .metric-card {
-        background-color: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 16px;
-        text-align: center;
-    }
-    .badge-tool {
-        background-color: #EFF6FF;
-        color: #1D4ED8;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        font-family: monospace;
-        font-weight: 600;
-        display: inline-block;
-        margin-right: 6px;
+    .hero-title {
+        font-size: 2.1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #FFFFFF 0%, #94A3B8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 6px;
-        border: 1px solid #BFDBFE;
     }
-    .badge-severity-critical {
+    .hero-subtitle {
+        font-size: 1rem;
+        color: #94A3B8;
+        font-weight: 400;
+    }
+
+    /* Answer Container Card */
+    .answer-card {
+        background: #FFFFFF;
+        border-radius: 14px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-top: 16px;
+        margin-bottom: 20px;
+        position: relative;
+        transition: all 0.2s ease-in-out;
+    }
+    .answer-card:hover {
+        box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08);
+        border-color: #CBD5E1;
+    }
+    .answer-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .answer-badge {
+        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+        color: #FFFFFF;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .answer-body {
+        font-size: 1.05rem;
+        line-height: 1.65;
+        color: #1E293B;
+    }
+
+    /* Tool Call Badges */
+    .tool-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        color: #475569;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 8px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .tool-chip-accent {
+        color: #2563EB;
+        border-color: #BFDBFE;
+        background: #EFF6FF;
+    }
+
+    /* Example prompt chips */
+    .prompt-chip {
+        display: inline-block;
+        background: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        color: #334155;
+        font-size: 0.88rem;
+        font-weight: 500;
+        padding: 6px 14px;
+        border-radius: 20px;
+        margin: 4px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    /* Severity Indicators */
+    .badge-critical {
         background-color: #FEE2E2;
         color: #991B1B;
-        padding: 2px 8px;
+        font-weight: 700;
+        padding: 2px 10px;
         border-radius: 6px;
-        font-weight: bold;
+        font-size: 0.85rem;
     }
-    .badge-severity-high {
+    .badge-high {
         background-color: #FFEDD5;
         color: #9A3412;
-        padding: 2px 8px;
+        font-weight: 700;
+        padding: 2px 10px;
         border-radius: 6px;
-        font-weight: bold;
+        font-size: 0.85rem;
     }
-    .badge-severity-medium {
+    .badge-medium {
         background-color: #FEF3C7;
         color: #92400E;
-        padding: 2px 8px;
+        font-weight: 700;
+        padding: 2px 10px;
         border-radius: 6px;
-        font-weight: bold;
+        font-size: 0.85rem;
     }
-    .evidence-box {
-        background-color: #F1F5F9;
-        border-left: 4px solid #3B82F6;
-        padding: 12px 16px;
-        border-radius: 0 8px 8px 0;
-        margin-top: 12px;
-        font-size: 0.95rem;
+
+    /* Evidence Box */
+    .evidence-container {
+        background: #F8FAFC;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+        padding: 16px;
+        margin-top: 14px;
+    }
+
+    /* Metric card adjustments */
+    div[data-testid="stMetric"] {
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     </style>
     """,
@@ -108,28 +204,67 @@ st.markdown(
 )
 
 # -----------------------------------------------------------------------------
-# Sidebar: System Status & Quick Navigation
+# Sidebar: System Status & Backend Info (Cleaned - No Example Prompts)
 # -----------------------------------------------------------------------------
 with st.sidebar:
-    st.image("https://img.icons8.com/isometric/100/service.png", width=64)
-    st.title("Support AI Hub")
+    st.image("https://img.icons8.com/isometric/100/service.png", width=56)
+    st.markdown("### **Support AI Hub**")
     st.caption("AI-Powered Support Analytics & Incident Insights")
 
-    st.divider()
+    st.markdown("---")
 
-    # Backend Connection Status Check
+    # Backend Connectivity
     is_healthy = client.get_health()
     if is_healthy:
-        st.success(f"🟢 Backend Connected\n`{API_BASE_URL}`")
+        st.success("🟢 **Backend Connected**")
+        st.caption(f"Endpoint: `{API_BASE_URL}`")
     else:
-        st.error(
-            f"🔴 Backend Disconnected\n`{API_BASE_URL}`\n\n"
-            "Unable to connect to the support analytics API. "
-            "Please make sure the FastAPI server is running."
+        st.error("🔴 **Backend Offline**")
+        st.caption(f"Target: `{API_BASE_URL}`")
+        st.warning(
+            "FastAPI server is unreachable.\n"
+            "Run: `uvicorn app.api.main:app --reload`"
         )
 
-    st.divider()
-    st.markdown("### 💡 Example Questions")
+    st.markdown("---")
+    st.markdown("**System Architecture**")
+    st.caption("• **Frontend**: Streamlit HTTP Client\n• **API**: FastAPI (port 8000)\n• **Orchestrator**: LangChain Agent\n• **Inference**: Groq LLM\n• **Database**: SQLite (500 tickets)")
+
+    st.markdown("---")
+    st.caption("Stage 7 • Technical Assessment AI System")
+
+
+# -----------------------------------------------------------------------------
+# Main Banner Header
+# -----------------------------------------------------------------------------
+st.markdown(
+    """
+    <div class="hero-container">
+        <div class="hero-title">Customer Support AI Assistant</div>
+        <div class="hero-subtitle">Natural language support ticket analytics, SLA tracking & anomaly detection</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Initialize Session States
+if "last_query" not in st.session_state:
+    st.session_state["last_query"] = ""
+if "last_response" not in st.session_state:
+    st.session_state["last_response"] = None
+
+# Tab Navigation
+tab_qa, tab_dashboard, tab_anomalies = st.tabs(
+    ["💬 AI Assistant", "📊 Operational Dashboard", "🚨 Anomaly Detection"]
+)
+
+# =============================================================================
+# TAB 1: AI Assistant (POST /ask) with Enter-to-Submit Form
+# =============================================================================
+with tab_qa:
+    st.markdown("#### 💡 Suggested Inquiries")
+
+    # Suggestion Chips in Main Page (Click to populate query)
     example_prompts = [
         "How many critical tickets are unresolved?",
         "Which agent has the lowest average customer rating?",
@@ -139,93 +274,97 @@ with st.sidebar:
         "Are there any anomalies in resolution times?",
     ]
 
-    selected_example = None
-    for i, prompt in enumerate(example_prompts):
-        if st.button(f"📌 {prompt}", key=f"ex_btn_{i}", use_container_width=True):
-            st.session_state["active_question"] = prompt
+    cols = st.columns(3)
+    for idx, prompt in enumerate(example_prompts):
+        col_target = cols[idx % 3]
+        with col_target:
+            if st.button(f"👉 {prompt}", key=f"quick_btn_{idx}", use_container_width=True):
+                st.session_state["prompt_to_run"] = prompt
 
-    st.divider()
-    st.caption("Stage 7 • FastAPI + Streamlit Interface")
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
+    # Check if a quick button was clicked
+    preset_query = st.session_state.pop("prompt_to_run", "")
 
-# -----------------------------------------------------------------------------
-# Main Header
-# -----------------------------------------------------------------------------
-st.markdown('<div class="main-title">Customer Support AI Assistant</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="sub-title">Natural Language Ticket Intelligence & Operational Insights</div>',
-    unsafe_allow_html=True,
-)
+    # Natural Language Query Form (Allows ENTER key to execute immediately)
+    with st.form(key="ask_form", clear_on_submit=False):
+        user_query = st.text_input(
+            "Ask a question about support tickets...",
+            value=preset_query,
+            placeholder="Type your question and press Enter or click Ask...",
+            help="Press Enter to execute the question immediately.",
+            key="user_query_input",
+        )
+        col_submit, col_hint = st.columns([1, 4])
+        with col_submit:
+            submit_button = st.form_submit_button("🚀 Ask", type="primary", use_container_width=True)
+        with col_hint:
+            st.caption("⌨️ *Tip: You can hit **Enter** directly in the text box to submit!*")
 
-# Tab Navigation
-tab_qa, tab_dashboard, tab_anomalies = st.tabs(
-    ["💬 AI Assistant", "📊 Operational Dashboard", "🚨 Anomaly Detection"]
-)
-
-# =============================================================================
-# TAB 1: AI Assistant (POST /ask)
-# =============================================================================
-with tab_qa:
-    st.markdown("### Ask a Question About Support Tickets")
-
-    # Question Input
-    default_text = st.session_state.get("active_question", "")
-    user_query = st.text_input(
-        "Ask a question about support tickets...",
-        value=default_text,
-        placeholder="e.g., How many critical tickets are unresolved?",
-        key="query_input",
-    )
-
-    col_btn1, col_btn2 = st.columns([1, 5])
-    with col_btn1:
-        submit_clicked = st.button("🚀 Ask", type="primary", use_container_width=True)
-    with col_btn2:
-        if st.button("🧹 Clear", use_container_width=False):
-            st.session_state["active_question"] = ""
-            st.rerun()
-
-    if submit_clicked and user_query:
+    # Trigger Execution on Submit
+    if (submit_button or preset_query) and (user_query or preset_query):
+        active_q = user_query.strip() or preset_query.strip()
         if not is_healthy:
             st.error(
                 "Unable to connect to the support analytics API. "
                 "Please make sure the FastAPI server is running."
             )
+        elif active_q:
+            with st.spinner("🤖 Orchestrating deterministic analytics & querying data store..."):
+                response_data = client.ask_question(active_q)
+                st.session_state["last_query"] = active_q
+                st.session_state["last_response"] = response_data
+
+    # Display Answer and Evidence
+    if st.session_state.get("last_response"):
+        resp = st.session_state["last_response"]
+        q_text = st.session_state.get("last_query", "")
+
+        if not resp.get("success", True) and resp.get("error"):
+            st.warning(f"⚠️ {resp.get('answer', 'An error occurred.')}")
         else:
-            with st.spinner("Analyzing support database and computing deterministic metrics..."):
-                response = client.ask_question(user_query)
+            # Styled Beautiful Answer Card
+            st.markdown(
+                f"""
+                <div class="answer-card">
+                    <div class="answer-header">
+                        <span class="answer-badge">✨ AI Response</span>
+                        <span style="color: #64748B; font-size: 0.9rem;">Query: <b>{q_text}</b></span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-            if not response.get("success", True) and response.get("error"):
-                st.warning(f"⚠️ {response.get('answer')}")
-            else:
-                st.markdown("#### 💡 Answer")
-                st.info(response.get("answer", "No answer provided."))
+            # Answer content rendered with full Markdown support
+            st.markdown(resp.get("answer", "No answer generated."))
 
-                # Tool Information Display
-                tool_calls = response.get("tool_calls", [])
-                if tool_calls:
-                    st.markdown("**Tools Executed:**")
-                    tool_html = " ".join(
-                        [
-                            f'<span class="badge-tool">⚙️ {tc.get("tool")}</span>'
-                            for tc in tool_calls
-                        ]
-                    )
-                    st.markdown(tool_html, unsafe_allow_html=True)
+            # Tool Provenance
+            tool_calls = resp.get("tool_calls", [])
+            if tool_calls:
+                st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+                st.markdown("**Deterministic Tools Invoked:**")
+                tool_chips = "".join(
+                    [
+                        f'<span class="tool-chip tool-chip-accent">⚙️ {tc.get("tool")}</span>'
+                        for tc in tool_calls
+                    ]
+                )
+                st.markdown(tool_chips, unsafe_allow_html=True)
 
-                # Evidence Display
-                evidence = response.get("evidence", {})
-                if evidence:
-                    with st.expander("🔍 Provenance & Structured Evidence", expanded=True):
-                        st.markdown('<div class="evidence-box">', unsafe_allow_html=True)
-                        st.json(evidence)
-                        st.markdown("</div>", unsafe_allow_html=True)
+            # Provenance & Structured Evidence Expander
+            evidence = resp.get("evidence", {})
+            if evidence:
+                with st.expander("🔍 Provenance & Structured Evidence Payload", expanded=False):
+                    st.json(evidence)
+
 
 # =============================================================================
 # TAB 2: Operational Dashboard (GET /analytics/summary)
 # =============================================================================
 with tab_dashboard:
-    st.markdown("### Operational Ticket Analytics")
+    st.markdown("### 📊 Operational Ticket Analytics")
+    st.caption("Real-time summary aggregated deterministically from the SQLite ticket repository.")
 
     if not is_healthy:
         st.error(
@@ -237,23 +376,24 @@ with tab_dashboard:
         if not summary:
             st.error("Failed to retrieve analytics summary from the API.")
         else:
-            # Metric KPIs
-            col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Total Tickets", f"{summary.get('total_tickets', 0):,}")
-            col2.metric("Resolved", f"{summary.get('resolved_tickets', 0):,}")
-            col3.metric("Unresolved", f"{summary.get('unresolved_tickets', 0):,}")
-            col4.metric(
+            # Executive Metric Cards
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Total Tickets", f"{summary.get('total_tickets', 0):,}")
+            m2.metric("Resolved Tickets", f"{summary.get('resolved_tickets', 0):,}")
+            m3.metric("Unresolved Backlog", f"{summary.get('unresolved_tickets', 0):,}")
+            m4.metric(
                 "Critical Unresolved",
                 f"{summary.get('critical_unresolved', 0):,}",
+                delta=f"{summary.get('critical_unresolved', 0)} requiring attention",
                 delta_color="inverse",
             )
 
-            st.divider()
+            st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
-            # Breakdown Visualizations
-            col_left, col_right = st.columns(2)
+            # Categorical Breakdowns
+            col_l, col_r = st.columns(2)
 
-            with col_left:
+            with col_l:
                 st.markdown("#### Backlog by Priority")
                 df_priority = pd.DataFrame(summary.get("by_priority", []))
                 if not df_priority.empty:
@@ -264,38 +404,40 @@ with tab_dashboard:
                 if not df_category.empty:
                     st.dataframe(df_category, use_container_width=True, hide_index=True)
 
-            with col_right:
-                st.markdown("#### Status Breakdown")
+            with col_r:
+                st.markdown("#### Status Distribution")
                 df_status = pd.DataFrame(summary.get("by_status", []))
                 if not df_status.empty:
                     st.dataframe(df_status, use_container_width=True, hide_index=True)
 
-                st.markdown("#### Performance Metrics")
+                st.markdown("#### Key Performance Indicators")
                 resp_info = summary.get("response_time", {})
                 res_info = summary.get("resolution_time", {})
                 rating_info = summary.get("customer_rating", {})
 
-                perf_data = {
-                    "Metric": [
-                        "Avg Response Time (hrs)",
-                        "Avg Resolution Time (hrs)",
-                        "Avg Customer Rating",
-                    ],
-                    "Value": [
-                        f"{resp_info.get('average_response_time_hrs', 0):.2f} hrs",
-                        f"{res_info.get('average_resolution_time_hrs', 0):.2f} hrs",
-                        f"⭐ {rating_info.get('average_customer_rating', 0):.2f} / 5.0",
-                    ],
-                }
-                st.dataframe(
-                    pd.DataFrame(perf_data), use_container_width=True, hide_index=True
+                perf_df = pd.DataFrame(
+                    {
+                        "KPI Metric": [
+                            "Average Response Time",
+                            "Average Resolution Time",
+                            "Average Customer Satisfaction",
+                        ],
+                        "Observed Value": [
+                            f"{resp_info.get('average_response_time_hrs', 0):.2f} hours",
+                            f"{res_info.get('average_resolution_time_hrs', 0):.2f} hours",
+                            f"⭐ {rating_info.get('average_customer_rating', 0):.2f} / 5.0",
+                        ],
+                    }
                 )
+                st.dataframe(perf_df, use_container_width=True, hide_index=True)
+
 
 # =============================================================================
 # TAB 3: Anomaly Detection (GET /anomalies)
 # =============================================================================
 with tab_anomalies:
-    st.markdown("### Anomaly Detection & SLA Outliers")
+    st.markdown("### 🚨 Anomaly Detection & SLA Breaches")
+    st.caption("Deterministic business-rule violations and statistical IQR resolution-time outlier reports.")
 
     if not is_healthy:
         st.error(
@@ -310,42 +452,42 @@ with tab_anomalies:
             summary_stats = anomalies_data.get("summary", {})
             anomalies_list = anomalies_data.get("anomalies", [])
 
-            # Severity Counters
-            c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Total Anomalies", summary_stats.get("total_anomalies", 0))
-            c2.metric("Critical", summary_stats.get("critical", 0))
-            c3.metric("High", summary_stats.get("high", 0))
-            c4.metric("Medium", summary_stats.get("medium", 0))
+            # Anomaly KPIs
+            a1, a2, a3, a4 = st.columns(4)
+            a1.metric("Total Flagged", summary_stats.get("total_anomalies", 0))
+            a2.metric("Critical Severity", summary_stats.get("critical", 0))
+            a3.metric("High Severity", summary_stats.get("high", 0))
+            a4.metric("Medium Severity", summary_stats.get("medium", 0))
 
-            st.divider()
+            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-            # Statistical Thresholds Info
+            # Statistical IQR Context
             stat_thresholds = anomalies_data.get("statistical_thresholds", {})
             if stat_thresholds:
-                st.caption(
-                    f"📐 Statistical Bounds (IQR 1.5x) — "
+                st.info(
+                    f"📐 **Statistical Baseline (IQR 1.5×)** — "
                     f"Resolution Time Upper Bound: **{stat_thresholds.get('resolution_time_upper_bound_hrs', 0)} hrs** "
-                    f"(Outliers: {stat_thresholds.get('resolution_outlier_count', 0)}) | "
+                    f"({stat_thresholds.get('resolution_outlier_count', 0)} outliers) | "
                     f"Response Time Upper Bound: **{stat_thresholds.get('response_time_upper_bound_hrs', 0)} hrs** "
-                    f"(Outliers: {stat_thresholds.get('response_outlier_count', 0)})"
+                    f"({stat_thresholds.get('response_outlier_count', 0)} outliers)"
                 )
 
-            # Anomaly Records Table
+            # Anomalies Table
             if anomalies_list:
                 df_anomalies = pd.DataFrame(anomalies_list)
 
                 # Severity filter
-                severities = ["All"] + sorted(list(df_anomalies["severity"].unique()))
-                selected_sev = st.selectbox("Filter by Severity:", severities)
+                sev_options = ["All"] + sorted(list(df_anomalies["severity"].unique()))
+                selected_sev = st.selectbox("Filter Anomaly Table by Severity:", sev_options)
 
                 if selected_sev != "All":
-                    display_df = df_anomalies[df_anomalies["severity"] == selected_sev]
+                    filtered_df = df_anomalies[df_anomalies["severity"] == selected_sev]
                 else:
-                    display_df = df_anomalies
+                    filtered_df = df_anomalies
 
-                cols_to_show = [
-                    col
-                    for col in [
+                cols_display = [
+                    c
+                    for c in [
                         "ticket_id",
                         "anomaly_type",
                         "severity",
@@ -354,16 +496,16 @@ with tab_anomalies:
                         "agent_id",
                         "reason",
                     ]
-                    if col in display_df.columns
+                    if c in filtered_df.columns
                 ]
 
                 st.dataframe(
-                    display_df[cols_to_show],
+                    filtered_df[cols_display],
                     use_container_width=True,
                     hide_index=True,
                 )
 
-                with st.expander("🔍 View Raw Anomaly Payload"):
+                with st.expander("🔍 View Complete Raw Anomaly JSON"):
                     st.json(anomalies_list)
             else:
-                st.success("No operational anomalies detected in the current ticket dataset.")
+                st.success("No operational anomalies detected in the support ticket database.")
